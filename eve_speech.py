@@ -5,8 +5,8 @@ import pyttsx3
 engine = pyttsx3.init()
 recognizer = sr.Recognizer()
 
-# Floor information dictionary (you can expand it with more details)
-floor_info = {
+# level information dictionary (you can expand it with more details)
+level_info = {
     "1": "Lobby",
     "one": "Lobby",
     "2": "Office space",
@@ -48,27 +48,27 @@ def recognize_speech():
 # Function to process the elevator command
 def process_command(command):
     if command:
-        if "take me to floor " in command:
+        if "take me to level" in command or "go to level" in command:
             try:
-                floor_number = command.split()[-1]
-                if floor_number in floor_info:
-                    speak(f"Taking you to floor {floor_number}.")
+                level_number = command.split()[-1]
+                if level_number in level_info:
+                    speak(f"Taking you to level {level_number}.")
                 else:
-                    speak(f"Floor {floor_number} is not available.")
+                    speak(f"level {level_number} is not available.")
             except ValueError:
-                speak("Sorry, I didn't catch the floor number.")
+                speak("Sorry, I didn't catch the level number.")
                 
-        elif "what's on floor " in command or "what is on floor " in command:
+        elif "what's on level" in command or "what is on level" in command or "is on level" in command:
             try:
-                floor_number = command.split()[-1]
-                if floor_number in floor_info:
-                    speak(f"Floor {floor_number} has the {floor_info[floor_number]}.")
+                level_number = command.split()[-1]
+                if level_number in level_info:
+                    speak(f"level {level_number} has the {level_info[level_number]}.")
                 else:
-                    speak(f"I don't have information about floor {floor_number}.")
+                    speak(f"I don't have information about level {level_number}.")
             except ValueError:
-                speak("Sorry, I didn't catch the floor number.")       
+                speak("Sorry, I didn't catch the level number.")       
         else:
-            speak("Sorry, I can only take you to a specific floor or tell you what's on a floor.")
+            speak("Sorry, I can only take you to a specific level or tell you what's on a level.")
 
 # Main loop to continuously listen for commands
 def elevator_voice_command_system():
