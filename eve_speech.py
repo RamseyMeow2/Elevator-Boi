@@ -8,20 +8,38 @@ pygame.mixer.init()
 engine = pyttsx3.init()
 recognizer = sr.Recognizer()
 
-level_info = {
-    "1": "Lobby",
-    "one": "Lobby",
-    "2": "Office space",
-    "two": "Office space",
-    "3": "Gym",
-    "three": "Gym",
-    "4": "Conference rooms",
-    "four": "Conference rooms",
-    "5": "Cafeteria",
-    "five": "Cafeteria",
-    "6": "Roof garden",
-    "six": "Roof garden",
+# level_info = {
+#     "1": "Lobby",
+#     "one": "Lobby",
+#     "2": "Office space",
+#     "two": "Office space",
+#     "3": "Gym",
+#     "three": "Gym",
+#     "4": "Conference rooms",
+#     "four": "Conference rooms",
+#     "5": "Cafeteria",
+#     "five": "Cafeteria",
+#     "6": "Roof garden",
+#     "six": "Roof garden",
+# }
+
+num_dict = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
 }
+
+
+current_level = 1
+level_value = 0
+level_info = {}
 
 
 def play_beep():
@@ -57,14 +75,27 @@ def recognize_speech():
 
 
 def process_command(command):
+    global current_level
     if command:
         if "take me to level" in command or "go to level" in command:
             try:
-                level_number = command.split()[-1]
-                if level_number in level_info:
-                    speak(f"Taking you to level {level_number}.")
+                input_num = command.split()[-1]
+                try:
+                    level_value = int(input_num)
+                except ValueError:
+                    if input_num in num_dict:
+                        level_value = num_dict[input_num]
+                    else:
+                        speak("Not a recognized number word")
+                        return
+                if level_value in level_info:
+                    if level_value == current_level:
+                        speak(f"Cannot go to {level_value} as the Elevator's already there.")
+                    else:
+                        speak(f"Taking you to level {level_value}.")
+                        current_level = level_value
                 else:
-                    speak(f"level {level_number} is not available.")
+                    speak(f"Level {level_value} is not available.")
             except ValueError:
                 speak("Sorry, I didn't catch the level number.")
 
@@ -74,11 +105,20 @@ def process_command(command):
             or "is on level" in command
         ):
             try:
-                level_number = command.split()[-1]
-                if level_number in level_info:
-                    speak(f"level {level_number} has the {level_info[level_number]}.")
+                input_num = command.split()[-1]
+                try:
+                    level_value = int(input_num)
+                except ValueError:
+                    if input_num in num_dict:
+                        level_value = num_dict[input_num]
+                    else:
+                        speak("Not a recognized number word")
+                        return
+
+                if level_value in level_info:
+                    speak(f"Level {level_value} has the {level_info[level_value]}.")
                 else:
-                    speak(f"I don't have information about level {level_number}.")
+                    speak(f"I don't have information about level {level_value}.")
             except ValueError:
                 speak("Sorry, I didn't catch the level number.")
         else:
@@ -87,19 +127,44 @@ def process_command(command):
             )
 
 
+def get_building_information():
+    print("How many floors are there in the building?")
+    num_floors = input("Enter the number of floors: ")
+
+    if num_floors.isdigit():
+        print(f"Great! There are {num_floors} floors.")
+        for i in range(1, int(num_floors) + 1):
+            print(f"Please tell me what is on floor {i}.")
+            floor_info = input(f"What is on floor {i}? ")
+            if floor_info:
+                level_info[i] = floor_info
+                print(f"Got it! Floor {i} has the {floor_info}.")
+        print("\nBuilding Information:")
+        for floor, info in level_info.items():
+            print(f"{floor}: {info}")
+    else:
+        speak("Sorry, I didn't understand the number of floors. Let's try again.")
+        get_building_information()
+
+
 def elevator_voice_command_system():
-    speak("Hello! How can I assist you?")
+    get_building_information()
+
     while True:
+        speak(f"The elevator's currently on level {current_level}.")
         speak(
             "You can ask the elevator to go to a specific level or ask what's on a level."
         )
         speak("Please speak your command after the beep.")
         play_beep()
         command = recognize_speech()
-        if command is not None and "stop" in command or "exit" in command:
-            speak("Stopping elevator.")
-            break
-        process_command(command)
+        if command is not None and ("stop" in command or "exit" in command):
+            speak("Opening the elevator door.")
+        else:
+            process_command(command)
+        speak("Have a great day.")
 
 
 elevator_voice_command_system()
+# TODO:
+# 1. Maybe loop through a container?
