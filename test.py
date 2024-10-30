@@ -66,7 +66,6 @@ def recognize_speech():
             client_socket.sendall(b"idle")
             return command.lower()
         except sr.UnknownValueError:
-            speak("Sorry, I didn't understand that.")
             client_socket.sendall(b"idle")
             return None
         except sr.RequestError:
@@ -138,24 +137,32 @@ def get_building_information():
 
 
 def standby_mode():
-    """Waits in standby mode until spacebar is pressed or 'assist' is recognized."""
-    print("Waiting in standby mode... Press spacebar or say 'assist' to start.")
+    """Waits in standby mode until Enter key is pressed or 'assist' is recognized."""
+    print("Waiting in standby mode... Press Enter or say 'assist' to start.")
+    
+    # Reinitialize the pygame display to ensure keyboard capture
+    pygame.display.quit()
+    pygame.display.init()
+    screen = pygame.display.set_mode((100, 100))  # Minimal display for event capture
+
     while True:
-        # Check for spacebar press to initiate assistance with welcome message
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                time.sleep(2)  # Simulate entry time
-                speak("Welcome! How may I assist you?")
-                play_beep()
-                return  # Exit standby and begin assistance
+        # Process events to capture the Enter key press
+        pygame.event.pump()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Changed from K_SPACE to K_RETURN
+                    speak("Welcome! How may I assist you?")
+                    play_beep()
+                    return  # Exit standby and begin assistance
 
         # Check for "assist" voice command to initiate assistance with help prompt
         command = recognize_speech()
         if command and "assist" in command:
-            play_beep()  # Play beep directly
             speak("What do you need help with? Speak after the beep.")
+            play_beep()  # Play beep directly
             return  # Exit standby and begin assistance
+
 
 
 def elevator_voice_command_system():
@@ -165,18 +172,12 @@ def elevator_voice_command_system():
         # Wait in standby until activated by spacebar or voice command
         standby_mode()
         
-        # Main assistance loop
-        while True:
-            command = recognize_speech()
-            if command and ("stop" in command or "exit" in command):
-                speak("Opening the elevator door. Have a great day!")
-                break  # End current assistance session and return to standby mode
-            
-            # Process the command
-            process_command(command)
+        # Process one command and then return to standby
+        command = recognize_speech()
+        process_command(command)
         
-        # Automatically return to standby mode after assistance
-        speak("Returning to standby mode.")
+        # Notify the user that the system is returning to standby
+        speak("If you need further assistance, please say 'assist' again.")
 
 
 

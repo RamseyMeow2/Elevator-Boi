@@ -68,7 +68,6 @@ def recognize_speech():
             client_socket.sendall(b"idle")  # Done listening
             return command.lower()
         except sr.UnknownValueError:
-            speak("Sorry, I didn't understand that.")
             client_socket.sendall(b"idle")
             return None
         except sr.RequestError:
@@ -152,6 +151,8 @@ def process_command(command):
             speak(
                 "Sorry, I can only take you to a specific level or tell you what's on a level."
             )
+    else:
+        speak("Sorry, I didn't understand that.")
 
 
 def get_building_information():
@@ -204,6 +205,7 @@ elevator_voice_command_system()
 # TO DO
 # 1. Do the button thing where u get into the elevator and it asks if u need assisstance
 # 1.a. Space bar ain't working
+# 1.b. MULTI THREADED
 # 2. Make the phrases into lists
 
 # Things to test
